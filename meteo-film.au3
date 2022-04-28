@@ -80,15 +80,16 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
 
     $offset_x = 0
     $offset_y = 0
-    
+
     For $y_tile = 0 To 5
         For $x_tile = 0 To 7
             $hTile = imageFromFileBinary($data[8*$y_tile + $x_tile])
             _GDIPlus_GraphicsDrawImageRectRect($hGraphic, $hTile, 0, 0, 512, 512, $offset_x + 512 * $x_tile, $offset_y + 512 * $y_tile, 512, 512)
+			_GDIPlus_ImageDispose($hTile)
         Next
     Next
     _GDIPlus_GraphicsDrawStringExEx($hGraphic, $timestamp,  0, 0, 510, 512, $hBlackBrush, "Comic Sans MS", 14, $FONT_BOLD)
-	    
+
 	$sImgCLSID = _GDIPlus_EncodersGetCLSID("PNG")
 	$tGUID = _WinAPI_GUIDFromString($sImgCLSID)
 	$pStream = _WinAPI_CreateStreamOnHGlobal() ;create stream
@@ -100,6 +101,7 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
 	$tData = DllStructCreate('byte[' & $iMemSize & ']', $pData)
 	$bData = DllStructGetData($tData, 1)
 	_GDIPlus_GraphicsDispose($hGraphic)
+	_GDIPlus_ImageDispose($himage)
 	_WinAPI_DeleteObject($hBitmap)
 	_WinAPI_ReleaseStream($pStream) ;http://msdn.microsoft.com/en-us/library/windows/desktop/ms221473(v=vs.85).aspx
 	_MemGlobalFree($hData)
@@ -129,6 +131,7 @@ Func imageFromFileBinary($binary)
 	_MemGlobalUnlock($hData)
 	$pStream = _WinAPI_CreateStreamOnHGlobal($hData)
 	$hImageFromStream = _GDIPlus_ImageLoadFromStream($pStream)
+	_WinAPI_ReleaseStream($pStream)
 	Return $hImageFromStream
 EndFunc   ;==>imageFromFileBinary
 
