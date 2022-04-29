@@ -12,10 +12,24 @@ _GDIPlus_Startup()
 Global Const $FONT_BOLD = 1
 global Const $ZOOM_LEVEL = 5
 $json = getWetterOnlineMetadata("Last48h")
+$array = sliceWetteronlineMetadata($json)
 
+For $metaslice In $array
+    $timestamp = getTimestampForMetaslice($metaslice)
+    
+    $cloudsTimepath = getCloudTimepathEurope($metaslice)
+	;_ArrayDisplay($cloudsTimepath)
+    
+	$cloudsTimepathGlobal = getCloudTimepathGlobal($metaslice)
+	;_ArrayDisplay($cloudsTimepathGlobal)
+    ConsoleWrite($timestamp & "  :  " & generateTimepathString($cloudsTimepathGlobal, "6") & "   :   " & generateTimepathString($cloudsTimepath, "6") &  @CRLF)
+Next
+
+Exit
 
 If 0 Then
-    $metaslice = getMetadataForTimestamp($json)
+    $defaultIndex = getDefaultIndex($json)
+    $metaslice = $array[$defaultIndex]
 	ConsoleWrite("meeeee: " & $metaslice & @CRLF)
     $timestamp = StringMid($metaslice, 2, 15);
 	$rainTimepath = getRainTimepathEurope($metaslice)
@@ -80,7 +94,7 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
 
     $offset_x = 0
     $offset_y = 0
-
+    
     For $y_tile = 0 To 5
         For $x_tile = 0 To 7
             $hTile = imageFromFileBinary($data[8*$y_tile + $x_tile])
@@ -89,7 +103,7 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
         Next
     Next
     _GDIPlus_GraphicsDrawStringExEx($hGraphic, $timestamp,  0, 0, 510, 512, $hBlackBrush, "Comic Sans MS", 14, $FONT_BOLD)
-
+	    
 	$sImgCLSID = _GDIPlus_EncodersGetCLSID("PNG")
 	$tGUID = _WinAPI_GUIDFromString($sImgCLSID)
 	$pStream = _WinAPI_CreateStreamOnHGlobal() ;create stream
