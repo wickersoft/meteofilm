@@ -14,11 +14,22 @@ Global Const $ZOOM_LEVEL = 5
 $json = getWetterOnlineMetadata("Last48h")
 $array = sliceWetteronlineMetadata($json)
 
+For $metaslice In $array
+    $timestamp = getTimestampForMetaslice($metaslice)
+    
+    $cloudsTimepath = getCloudTimepathEurope($metaslice)
+	;_ArrayDisplay($cloudsTimepath)
+    
+	$cloudsTimepathGlobal = getCloudTimepathGlobal($metaslice)
+	;_ArrayDisplay($cloudsTimepathGlobal)
+    ConsoleWrite($timestamp & "  :  " & generateTimepathString($cloudsTimepathGlobal, "6") & "   :   " & generateTimepathString($cloudsTimepath, "6") &  @CRLF)
+Next
+
+Exit
+
 If 0 Then
-	$init = TimerInit()
-	$defaultIndex = getDefaultIndex($json)
-	ConsoleWrite(TimerDiff($init) & @CRLF)
-	$metaslice = $array[$defaultIndex]
+    $defaultIndex = getDefaultIndex($json)
+    $metaslice = $array[$defaultIndex]
 	ConsoleWrite("meeeee: " & $metaslice & @CRLF)
 	$timestamp = StringMid($metaslice, 2, 15) ;
 	$rainTimepath = getRainTimepathEurope($metaslice)
@@ -80,17 +91,17 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
 	_GDIPlus_GraphicsFillRect($hGraphic, 0, 0, $iwidth, $iheight, $hWhiteBrush)
 
 
-	$offset_x = 0
-	$offset_y = 0
-
-	For $y_tile = 0 To 5
-		For $x_tile = 0 To 7
-			$hTile = imageFromFileBinary($data[8 * $y_tile + $x_tile])
-			_GDIPlus_GraphicsDrawImageRectRect($hGraphic, $hTile, 0, 0, 512, 512, $offset_x + 512 * $x_tile, $offset_y + 512 * $y_tile, 512, 512)
+    $offset_x = 0
+    $offset_y = 0
+    
+    For $y_tile = 0 To 5
+        For $x_tile = 0 To 7
+            $hTile = imageFromFileBinary($data[8*$y_tile + $x_tile])
+            _GDIPlus_GraphicsDrawImageRectRect($hGraphic, $hTile, 0, 0, 512, 512, $offset_x + 512 * $x_tile, $offset_y + 512 * $y_tile, 512, 512)
 			_GDIPlus_ImageDispose($hTile)
-		Next
-	Next
-	_GDIPlus_GraphicsDrawStringExEx($hGraphic, $timestamp, 0, 0, 510, 512, $hBlackBrush, "Comic Sans MS", 14, $FONT_BOLD)
+        Next
+    Next
+    _GDIPlus_GraphicsDrawStringExEx($hGraphic, $timestamp,  0, 0, 510, 512, $hBlackBrush, "Comic Sans MS", 14, $FONT_BOLD)
 
 	$sImgCLSID = _GDIPlus_EncodersGetCLSID("PNG")
 	$tGUID = _WinAPI_GUIDFromString($sImgCLSID)
