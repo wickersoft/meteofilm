@@ -1,4 +1,5 @@
 #include "Wickersoft_HTTP.au3"
+#include "Wickersoft_FBAPI.au3"
 #include "Array.au3"
 
 Func getRainMap($json, $timestamp = "")
@@ -98,21 +99,32 @@ Func getWetterOnlineMetadata($periodLast = "Last6h")
 	Return $json
 EndFunc   ;==>getWetterOnlineMetadata
 
-Func getAllAvailableTimestamps($json)
-	Return stringextractall($json, '{"id": "', '"')
+Func sliceWetteronlineMetadata($json)
+    $array = stringextractall($json, '{"id": ', '}}}}')
+    Return $array
+EndFunc
+
+Func getAllAvailableTimestamps($array)
+	Dim $out[UBound($array)]
+    For $i = 0 to UBound($array) - 1
+        $out = getTimestampForMetaslice($array[$i])
+    Next
+    Return $out
 EndFunc   ;==>getAllAvailableTimestamps
 
-Func getMetadataForTimestamp($json, $timestamp = "")
-	$defaultindex = Number(stringextract($json, '"defaultIndex": "', '"'))
-	$array = stringextractall($json, '{"id": ', '}}}}')
+Func getTimestampForMetaslice($metaslice)
+    Return StringMid($metaslice, 2, 15)
+EndFunc
 
-	If $timestamp = "" Then
-		Return $array[$defaultindex]
-	Else
-		For $line In $array
-			If StringMid($line, 2, 15) = $timestamp Then Return $line
-		Next
-	EndIf
+Func getDefaultIndex($json)
+    $defaultindex = Number(stringextract($json, '"defaultIndex": "', '"'))
+    Return $defaultindex
+EndFunc
+
+Func getMetadataForTimestamp($array, $timestamp)
+    For $line In $array
+        If getTimestampForMetaslice($line) = $timestamp Then Return $line
+    Next
 EndFunc   ;==>getMetadataForTimestamp
 
 Func getRainTimepathEurope($metaslice)
@@ -348,7 +360,7 @@ Func generateTimepathString($timepath, $zoomlevel = "")
 	Else
 		$timepath[7] = "ZL" & $timepath[7]
 	EndIf
-	Return _ArrayToString($timepath, "/")
+	Return $timepath[0] & "/" & $timepath[1] & "/" & $timepath[2] & "/" & $timepath[3] & "/" & $timepath[4] & "/" & $timepath[5] & "/" & $timepath[6] & "/" & $timepath[7]
 EndFunc   ;==>generateTimepathString
 
 Func lpad($string, $totallen)
