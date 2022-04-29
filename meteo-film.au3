@@ -67,19 +67,18 @@ FileClose($H)
 Exit
 EndIf
 
-
-$timestamps = getallavailabletimestamps($json)
-
 DirCreate("meteofilm")
 
-For $timestamp in $timestamps
-    If FileExists("meteofilm\" & $timestamp & ".png") then ContinueLoop
-    ConsoleWrite($timestamp & @CRLF)
-    $data = getHDWeatherMap($json, $timestamp)
-    $img = drawLabelContent(3840, 3072, $data, $timestamp)
-    $hf = FileOpen("meteofilm\" & $timestamp & ".png", 18)
-    FileWrite($hf, $img)
-    FileClose($hf)
+For $i = 0 To UBound($array) - 10
+    $metaslice = $array[$i]
+	$timestamp = getTimestampForMetaslice($metaslice)
+	If FileExists("meteofilm\" & $timestamp & ".png") Then ContinueLoop
+	ConsoleWrite($timestamp & @CRLF)
+	$data = getHDWeatherMap($metaslice)
+	$img = drawLabelContent(3840, 3072, $data, $timestamp)
+	$hf = FileOpen("meteofilm\" & $timestamp & ".png", 18)
+	FileWrite($hf, $img)
+	FileClose($hf)
 Next
 
 Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
