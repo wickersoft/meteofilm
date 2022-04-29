@@ -10,28 +10,17 @@
 
 _GDIPlus_Startup()
 Global Const $FONT_BOLD = 1
-global Const $ZOOM_LEVEL = 5
+Global Const $ZOOM_LEVEL = 5
 $json = getWetterOnlineMetadata("Last48h")
 $array = sliceWetteronlineMetadata($json)
 
-For $metaslice In $array
-    $timestamp = getTimestampForMetaslice($metaslice)
-    
-    $cloudsTimepath = getCloudTimepathEurope($metaslice)
-	;_ArrayDisplay($cloudsTimepath)
-    
-	$cloudsTimepathGlobal = getCloudTimepathGlobal($metaslice)
-	;_ArrayDisplay($cloudsTimepathGlobal)
-    ConsoleWrite($timestamp & "  :  " & generateTimepathString($cloudsTimepathGlobal, "6") & "   :   " & generateTimepathString($cloudsTimepath, "6") &  @CRLF)
-Next
-
-Exit
-
 If 0 Then
-    $defaultIndex = getDefaultIndex($json)
-    $metaslice = $array[$defaultIndex]
+	$init = TimerInit()
+	$defaultIndex = getDefaultIndex($json)
+	ConsoleWrite(TimerDiff($init) & @CRLF)
+	$metaslice = $array[$defaultIndex]
 	ConsoleWrite("meeeee: " & $metaslice & @CRLF)
-    $timestamp = StringMid($metaslice, 2, 15);
+	$timestamp = StringMid($metaslice, 2, 15) ;
 	$rainTimepath = getRainTimepathEurope($metaslice)
 	;_ArrayDisplay($rainTimepath)
 
@@ -59,12 +48,12 @@ If 0 Then
 	;$cloudsTimepathGlobal[6] = "v" & ($ctgv + 1)
 
 	;_ArrayDisplay($cloudsTimepathGlobal)
-$tile = getWeatherTile(tileCoordsOf(32, 18, 6), $timestamp, $rainTimepath, $rainTimepathGlobal, $cloudsTimepath, $cloudsTimepathGlobal, $lightningTimepath, $lightningTimepathGlobal, $cityTimepathGlobal)
-$h = FileOpen(@DesktopDir & "\meteo1.png", 18)
-filewrite($h, $tile)
-FileClose($H)
+	$tile = getWeatherTile(tileCoordsOf(32, 18, 6), $timestamp, $rainTimepath, $rainTimepathGlobal, $cloudsTimepath, $cloudsTimepathGlobal, $lightningTimepath, $lightningTimepathGlobal, $cityTimepathGlobal)
+	$h = FileOpen(@DesktopDir & "\meteo1.png", 18)
+	FileWrite($h, $tile)
+	FileClose($h)
 
-Exit
+	Exit
 EndIf
 
 DirCreate("meteofilm")
@@ -91,18 +80,18 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
 	_GDIPlus_GraphicsFillRect($hGraphic, 0, 0, $iwidth, $iheight, $hWhiteBrush)
 
 
-    $offset_x = 0
-    $offset_y = 0
-    
-    For $y_tile = 0 To 5
-        For $x_tile = 0 To 7
-            $hTile = imageFromFileBinary($data[8*$y_tile + $x_tile])
-            _GDIPlus_GraphicsDrawImageRectRect($hGraphic, $hTile, 0, 0, 512, 512, $offset_x + 512 * $x_tile, $offset_y + 512 * $y_tile, 512, 512)
+	$offset_x = 0
+	$offset_y = 0
+
+	For $y_tile = 0 To 5
+		For $x_tile = 0 To 7
+			$hTile = imageFromFileBinary($data[8 * $y_tile + $x_tile])
+			_GDIPlus_GraphicsDrawImageRectRect($hGraphic, $hTile, 0, 0, 512, 512, $offset_x + 512 * $x_tile, $offset_y + 512 * $y_tile, 512, 512)
 			_GDIPlus_ImageDispose($hTile)
-        Next
-    Next
-    _GDIPlus_GraphicsDrawStringExEx($hGraphic, $timestamp,  0, 0, 510, 512, $hBlackBrush, "Comic Sans MS", 14, $FONT_BOLD)
-	    
+		Next
+	Next
+	_GDIPlus_GraphicsDrawStringExEx($hGraphic, $timestamp, 0, 0, 510, 512, $hBlackBrush, "Comic Sans MS", 14, $FONT_BOLD)
+
 	$sImgCLSID = _GDIPlus_EncodersGetCLSID("PNG")
 	$tGUID = _WinAPI_GUIDFromString($sImgCLSID)
 	$pStream = _WinAPI_CreateStreamOnHGlobal() ;create stream
@@ -136,7 +125,7 @@ EndFunc   ;==>_GDIPlus_GraphicsDrawStringExEx
 
 Func imageFromFileBinary($binary)
 	$iLength = BinaryLen($binary)
-    ConsoleWrite("Length: " & $iLength & @CRLF)
+	ConsoleWrite("Length: " & $iLength & @CRLF)
 	$hData = _MemGlobalAlloc($iLength, $GMEM_MOVEABLE)
 	$pData = _MemGlobalLock($hData)
 	$tData = DllStructCreate('byte[' & $iLength & ']', $pData)
