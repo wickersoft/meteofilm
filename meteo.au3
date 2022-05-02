@@ -91,6 +91,20 @@ Func getWeatherTileUrl($tile_coords, $timestamp, $rainTimepath, $rainTimepathGlo
 	Return $url
 EndFunc   ;==>getWeatherTileUrl
 
+Func getWeatherTileWithWinHTTP($tile_coords, $timestamp, $rainTimepath, $rainTimepathGlobal, $cloudsTimepath, $cloudsTimepathGlobal, $lightningTimepath, $lightningTimepathGlobal, $cityTimepathGlobal)
+	$url = getWeatherTileUrlForWinHTTP($tile_coords, $timestamp, $rainTimepath, $rainTimepathGlobal, $cloudsTimepath, $cloudsTimepathGlobal, $lightningTimepath, $lightningTimepathGlobal, $cityTimepathGlobal)
+	ConsoleWrite("Weather url: " & $url & @CRLF)
+	$tile = _https("tiles.wo-cloud.com", $url)
+	Return $tile
+EndFunc   ;==>getWeatherTile
+
+Func getWeatherTileUrlForWinhttp($tile_coords, $timestamp, $rainTimepath, $rainTimepathGlobal, $cloudsTimepath, $cloudsTimepathGlobal, $lightningTimepath, $lightningTimepathGlobal, $cityTimepathGlobal)
+	$tiles64 = generateTilesString3($tile_coords, $rainTimepath, $rainTimepathGlobal, $cloudsTimepath, $cloudsTimepathGlobal, $lightningTimepath, $lightningTimepathGlobal, $cityTimepathGlobal)
+	$url = "https://tiles.wo-cloud.com/composite?format=png&lg=wr&tiles=" & $tiles64
+	If $timestamp <> "" Then $url &= "&time=" & $timestamp
+	Return $url
+EndFunc   ;==>getWeatherTileUrl
+
 Func getWetterOnlineMetadata($periodLast = "Last6h")
 	$http = _https("tiles.wo-cloud.com", "metadata?lg=wr&period=period" & $periodLast & "&type=period")
 	$json = BinaryToString($http[0])
