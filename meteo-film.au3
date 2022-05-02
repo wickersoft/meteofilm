@@ -8,6 +8,7 @@
 #include <Date.au3>
 #include "meteo.au3"
 
+_Singleton("meteofilm")
 _GDIPlus_Startup()
 Global Const $FONT_BOLD = 1
 Global Const $ZOOM_LEVEL = 5
