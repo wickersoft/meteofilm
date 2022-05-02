@@ -14,12 +14,14 @@ Global Const $ZOOM_LEVEL = 5
 $json = getWetterOnlineMetadata("Last48h")
 $array = sliceWetteronlineMetadata($json)
 
+If 0 Then
+
 For $metaslice In $array
     $timestamp = getTimestampForMetaslice($metaslice)
-    
+
     $cloudsTimepath = getCloudTimepathEurope($metaslice)
 	;_ArrayDisplay($cloudsTimepath)
-    
+
 	$cloudsTimepathGlobal = getCloudTimepathGlobal($metaslice)
 	;_ArrayDisplay($cloudsTimepathGlobal)
     ConsoleWrite($timestamp & "  :  " & generateTimepathString($cloudsTimepathGlobal, "6") & "   :   " & generateTimepathString($cloudsTimepath, "6") &  @CRLF)
@@ -27,7 +29,6 @@ Next
 
 Exit
 
-If 0 Then
     $defaultIndex = getDefaultIndex($json)
     $metaslice = $array[$defaultIndex]
 	ConsoleWrite("meeeee: " & $metaslice & @CRLF)
@@ -74,7 +75,7 @@ For $i = 0 To UBound($array) - 10
 	$timestamp = getTimestampForMetaslice($metaslice)
 	If FileExists("meteofilm\" & $timestamp & ".png") Then ContinueLoop
 	ConsoleWrite($timestamp & @CRLF)
-	$data = getHDWeatherMap($metaslice)
+	$data = getHDWeatherMap($metaslice, $timestamp)
 	$img = drawLabelContent(3840, 3072, $data, $timestamp)
 	$hf = FileOpen("meteofilm\" & $timestamp & ".png", 18)
 	FileWrite($hf, $img)
@@ -93,7 +94,7 @@ Func drawLabelContent($iwidth, $iheight, $data, $timestamp)
 
     $offset_x = 0
     $offset_y = 0
-    
+
     For $y_tile = 0 To 5
         For $x_tile = 0 To 7
             $hTile = imageFromFileBinary($data[8*$y_tile + $x_tile])
